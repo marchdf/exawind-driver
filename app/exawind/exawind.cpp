@@ -86,17 +86,18 @@ int main(int argc, char** argv)
     const YAML::Node node = doc["exawind"];
     const std::string amr_inp = node["amr_wind_inp"].as<std::string>();
     const std::string nalu_inp = node["nalu_wind_inp"].as<std::string>();
-    std::filesystem::path fpath_amr_inp(amr_inp);
-    const std::string amr_log =
-        fpath_amr_inp.replace_extension(".log").string();
-    std::ofstream out(amr_log);
 
     exawind::OversetSimulation sim(MPI_COMM_WORLD);
     sim.echo(
         "Initializing AMR-Wind on " + std::to_string(num_awind_ranks) +
         " MPI ranks");
-    if (amr_comm != MPI_COMM_NULL)
+    if (amr_comm != MPI_COMM_NULL) {
+        std::filesystem::path fpath_amr_inp(amr_inp);
+        const std::string amr_log =
+            fpath_amr_inp.replace_extension(".log").string();
+        std::ofstream out(amr_log);
         exawind::AMRWind::initialize(amr_comm, amr_inp, out);
+    }
     sim.echo(
         "Initializing Nalu-Wind on " + std::to_string(num_nwind_ranks) +
         " MPI ranks");
